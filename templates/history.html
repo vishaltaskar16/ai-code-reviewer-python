@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Review History - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-6">Review History</h1>
+    <div class="text-muted">Total: {{ reviews.total }} reviews</div>
+</div>
+
+{% if reviews.items %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Language</th>
+                        <th>Review Types</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in reviews.items %}
+                    <tr>
+                        <td>{{ review.id }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ review.language }}</span>
+                        </td>
+                        <td>
+                            {% for type in review.review_types.split(',') %}
+                                <span class="badge bg-light text-dark me-1">{{ type }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <span class="badge {% if review.score >= 80 %}bg-success{% elif review.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ review.score }}/100
+                            </span>
+                        </td>
+                        <td>{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('review_details', review_id=review.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if reviews.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('history', page=reviews.prev_num) }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for page_num in reviews.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == reviews.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('history', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if reviews.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('history', page=reviews.next_num) }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+    <h4 class="text-muted">No review history yet</h4>
+    <p class="text-muted">Start by analyzing some code to see your review history here.</p>
+    <a href="{{ url_for('review') }}" class="btn btn-primary">Start Your First Review</a>
+</div>
+{% endif %}
+{% endblock %}

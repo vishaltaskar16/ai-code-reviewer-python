@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Code Review - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">AI Code Review</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST" id="reviewForm">
+                    <div class="mb-3">
+                        <label for="language" class="form-label">Programming Language</label>
+                        <select class="form-select" id="language" name="language" required>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="typescript">TypeScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                            <option value="php">PHP</option>
+                            <option value="ruby">Ruby</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Review Types</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="review_types" value="security" id="security" checked>
+                            <label class="form-check-label" for="security">
+                                <i class="fas fa-shield-alt text-success me-1"></i>Security
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="review_types" value="quality" id="quality" checked>
+                            <label class="form-check-label" for="quality">
+                                <i class="fas fa-star text-warning me-1"></i>Code Quality
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="review_types" value="performance" id="performance">
+                            <label class="form-check-label" for="performance">
+                                <i class="fas fa-bolt text-info me-1"></i>Performance
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Code to Review</label>
+                        <textarea class="form-control font-monospace" id="code" name="code" rows="15" 
+                                  placeholder="Paste your code here..." required>{{ code if code }}</textarea>
+                        <div class="form-text">Maximum 10,000 characters recommended for best results.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+                        <i class="fas fa-robot me-2"></i>Analyze Code
+                    </button>
+                </form>
+
+                <!-- GitHub PR Review Section -->
+                <div class="mt-5">
+                    <h5>GitHub PR Review</h5>
+                    <form id="githubForm" class="mt-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="url" class="form-control" placeholder="GitHub Repository URL" 
+                                       id="repoUrl" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" placeholder="PR Number" 
+                                       id="prNumber" required>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fab fa-github me-1"></i>Review PR
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+});
+
+document.getElementById('githubForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const repoUrl = document.getElementById('repoUrl').value;
+    const prNumber = document.getElementById('prNumber').value;
+    const btn = e.target.querySelector('button');
+    
+    if (!repoUrl || !prNumber) return;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+    
+    try {
+        const response = await fetch('/github-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ repo_url: repoUrl, pr_number: prNumber })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('PR review completed! Check the history page for results.');
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fab fa-github me-1"></i>Review PR';
+    }
+});
+</script>
+{% endblock %}

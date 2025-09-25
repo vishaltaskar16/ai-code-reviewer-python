@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Review Results - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-6">Review Results</h1>
+            <a href="{{ url_for('review') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Review
+            </a>
+        </div>
+
+        <!-- Review Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Review Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="display-4 fw-bold {% if review.score >= 80 %}text-success{% elif review.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ review.score }}/100
+                        </div>
+                        <div class="text-muted">Overall Score</div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Language:</strong>
+                                <span class="badge bg-secondary ms-2">{{ review.language }}</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Review Types:</strong>
+                                {% for type in review.review_types.split(',') %}
+                                    <span class="badge bg-light text-dark ms-1">{{ type }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Date:</strong>
+                                <span class="ms-2">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Code Preview:</strong>
+                            <div class="code-block mt-2">
+                                <pre><code>{{ review.code_snippet }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Findings -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Detailed Findings ({{ findings|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if findings %}
+                    <div class="accordion" id="findingsAccordion">
+                        {% for finding in findings %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" 
+                                        type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#finding{{ finding.id }}">
+                                    <span class="badge severity-{{ finding.severity.lower() }} me-2">
+                                        {{ finding.severity }}
+                                    </span>
+                                    {{ finding.review_type|title }} Issue
+                                </button>
+                            </h2>
+                            <div id="finding{{ finding.id }}" 
+                                 class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                                 data-bs-parent="#findingsAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <strong>Description:</strong>
+                                        <p class="mb-2">{{ finding.description }}</p>
+                                    </div>
+                                    {% if finding.suggestion %}
+                                    <div class="mb-3">
+                                        <strong>Suggestion:</strong>
+                                        <p class="mb-2 text-success">{{ finding.suggestion }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if finding.file_path %}
+                                    <div class="mb-3">
+                                        <strong>Location:</strong>
+                                        <code>{{ finding.file_path }}{% if finding.line_number %}:{{ finding.line_number }}{% endif %}</code>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5 class="text-success">No issues found!</h5>
+                        <p class="text-muted">Great job! Your code looks clean and follows best practices.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Raw Results (for debugging) -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <button class="btn btn-sm btn-outline-secondary" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#rawResults">
+                    <i class="fas fa-code me-1"></i>Raw AI Results
+                </button>
+            </div>
+            <div id="rawResults" class="collapse">
+                <div class="card-body">
+                    <pre><code>{{ review.results|safe }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

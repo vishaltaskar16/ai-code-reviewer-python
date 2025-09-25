@@ -1,0 +1,78 @@
+/* Custom styles for AI Code Reviewer */
+
+:root {
+    --primary-color: #4e73df;
+    --success-color: #1cc88a;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --info-color: #36b9cc;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.stats-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 10px;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.code-block {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.severity-critical { border-left-color: var(--danger-color); }
+.severity-high { border-left-color: var(--warning-color); }
+.severity-medium { border-left-color: var(--info-color); }
+.severity-low { border-left-color: var(--success-color); }
+.severity-info { border-left-color: var(--primary-color); }
+
+.badge.severity-critical { background-color: var(--danger-color); }
+.badge.severity-high { background-color: var(--warning-color); }
+.badge.severity-medium { background-color: var(--info-color); }
+.badge.severity-low { background-color: var(--success-color); }
+.badge.severity-info { background-color: var(--primary-color); }
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}

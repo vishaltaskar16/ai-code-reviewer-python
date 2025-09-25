@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6">Dashboard</h1>
+        <p class="text-muted">AI-powered code review insights</p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('review') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Review
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-5">
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x text-primary mb-3"></i>
+                <h3>{{ stats.total_reviews }}</h3>
+                <p class="text-muted">Total Reviews</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-2x text-warning mb-3"></i>
+                <h3>{{ stats.average_score }}/100</h3>
+                <p class="text-muted">Average Score</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                <h3>{{ stats.critical_issues }}</h3>
+                <p class="text-muted">Critical Issues</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Reviews -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Recent Reviews</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_reviews %}
+            <div class="list-group">
+                {% for review in recent_reviews %}
+                    <a href="{{ url_for('review_details', review_id=review.id) }}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <span class="badge bg-secondary">{{ review.language }}</span>
+                                {{ review.code_snippet[:100] }}...
+                            </h6>
+                            <small class="text-muted">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small>
+                                {% for type in review.review_types.split(',') %}
+                                    <span class="badge bg-light text-dark me-1">{{ type }}</span>
+                                {% endfor %}
+                            </small>
+                            <span class="badge {% if review.score >= 80 %}bg-success{% elif review.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                Score: {{ review.score }}/100
+                            </span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-code fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No reviews yet. Start by analyzing some code!</p>
+                <a href="{{ url_for('review') }}" class="btn btn-primary">Start Your First Review</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
